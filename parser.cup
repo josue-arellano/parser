@@ -30,11 +30,8 @@ non terminal            FieldKleene, ProtoKleene, VarDeclKleene;
 non terminal            StmtKleene, ExprRepeat;
 
 /* Precedences */
-/*
-precedence left PLUS, MINUS;
-precedence left TIMES, DIVIDE, MOD;
-precedence left UMINUS;
-*/
+precedence left _plus, _minus;
+precedence left _multiplication, _division, _mod;
 /* The grammar */
 Program         ::= Decl | Decl Program;
 Decl            ::= VariableDecl 
@@ -51,8 +48,9 @@ Type            ::= _int
                     | Type _leftbrace _rightbrace 
                     | _id;
 FunctionDecl    ::= Type _id _leftparen Formals _rightparen StmtBlock
-                    | _void _id _leftparen Formals _rightparen StmtBlock;
-Formals         ::= VarRepeat | ;
+                    | _void _id _leftparen Formals _rightparen StmtBlock
+                    | _void _id _leftparen _rightparen StmtBlock;
+Formals         ::= VarRepeat;
 VarRepeat       ::= Variable | Variable VarRepeat;
 ClassDecl       ::= _class _id _less _extends _id _greater _less _implements IDList _greater _leftbracket FieldKleene _rightbracket;
 FieldKleene     ::= Field | Field FieldKleene | ;
