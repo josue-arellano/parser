@@ -10,7 +10,12 @@ terminal            UMINUS, LPAREN, RPAREN;
 terminal Integer    NUMBER;
 
 /* Non terminals */
-non terminal            expr_list, expr_part;
+non terminal            Program, Decl, VariableDecl, FunctionDecl;
+non terminal            ClassDecl, InterfaceDecl, Variable, Type;
+non terminal            FunctionDecl, Formals, ClassDecl, Field;
+non terminal            InterfaceDecl, Prototype, StmtBlock, Stmt;
+non terminal            IfStmt, WhileStmt, ForStmt, BreakStmt;
+non terminal            ReturnStmt, PrintStmt, Expr;
 non terminal Integer    expr, term, factor;
 
 /* Precedences */
@@ -31,3 +36,73 @@ expr      ::= expr PLUS expr
             | LPAREN expr RPAREN
 	    | NUMBER
 	    ;
+Program         ::= Decl+
+Decl            ::= VariableDecl 
+                    | FunctionDecl 
+                    | ClassDecl 
+                    | InterfaceDecl
+VariableDecl    ::= Variable;
+Variable        ::= Type _id
+Type            ::= _int 
+                    | _double 
+                    | _boolean
+                    | _string 
+                    | Type[] 
+                    | _id
+FunctionDecl    ::= Type _id(Formals) StmtBlock
+                    | _void _id(Formals) StmtBlock
+Formals         ::= Variable+, | e_production
+ClassDecl       ::= _class _id <_extends _id>  < _implements _id+, > { Field*}
+Field           ::= VariableDecl
+                    | FunctionDecl
+InterfaceDecl   ::= _interface _id{ Prototype* }
+Prototype       ::= Type _id(Formals);
+                    | _void _id(Formals);
+StmtBlock       ::= {VariableDecl* Stmt*}
+Stmt            ::= <Expr> ;
+                    | IfStmt
+                    | WhileStmt
+                    | ForStmt
+                    | BreakStmt
+                    | ReturnStmt
+                    | PrintStmt
+                    | StmtBlock 
+IfStmt          ::= _if (Expr) Stmt <else Stmt>
+WhileStmt       ::= _while (Expr) Stmt
+ForStmt         ::= _for ( <Expr>; Expr; <Expr> ) Stmt
+BreakStmt       ::= _break;
+ReturnStmt      ::= _return <Expr>;
+PrintStmt       ::= _println(Expr+,);
+Expr            ::= Lvalue = Expr
+                    | Constant
+                    | Lvalue
+                    | Call
+                    | (Expr) 
+                    | Expr + Expr
+                    | Expr – Expr
+                    | Expr * Expr
+                    | Expr / Expr
+                    | Expr % Expr
+                    | -Expr
+                    | Expr < Expr
+                    | Expr <= Expr
+                    | Expr > Expr
+                    | Expr >= Expr
+                    | Expr == Expr
+                    | Expr != Expr
+                    | Expr && Expr
+                    | Expr || Expr
+                    | !Expr readln ()
+                    | new ( _id ) 
+                    | newarray (intconstant, Type)
+Lvalue          ::= _id
+                    | Lvalue[Expr] 
+                    | Lvalue. _id
+Call            ::= _id ( Actuals) 
+                    | id . id ( Actuals)
+Actuals         ::= Expr+, | e_production
+Constant        ::= intconstant 
+                    | doubleconstant 
+                    | stringconstant 
+                    | booleanconstant
+                    | null
