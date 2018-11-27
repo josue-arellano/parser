@@ -41,25 +41,25 @@ Decl            ::= VariableDecl
                     | FunctionDecl 
                     | ClassDecl 
                     | InterfaceDecl
-VariableDecl    ::= Variable;
+VariableDecl    ::= Variable _semicolon
 Variable        ::= Type _id
 Type            ::= _int 
                     | _double 
                     | _boolean
                     | _string 
-                    | Type[] 
+                    | Type _leftbrace _rightbrace 
                     | _id
-FunctionDecl    ::= Type _id(Formals) StmtBlock
-                    | _void _id(Formals) StmtBlock
+FunctionDecl    ::= Type _id _leftparen Formals _rightparen StmtBlock
+                    | _void _id _leftparen Formals _rightparen StmtBlock
 Formals         ::= Variable+, | e_production
-ClassDecl       ::= _class _id <_extends _id>  < _implements _id+, > { Field*}
+ClassDecl       ::= _class _id _less _extends _id _greater _less _implements _id+, _greater _leftbracket Field* _rightbracket
 Field           ::= VariableDecl
                     | FunctionDecl
-InterfaceDecl   ::= _interface _id{ Prototype* }
-Prototype       ::= Type _id(Formals);
-                    | _void _id(Formals);
-StmtBlock       ::= {VariableDecl* Stmt*}
-Stmt            ::= <Expr> ;
+InterfaceDecl   ::= _interface _id _leftbracket Prototype* _rightbracket
+Prototype       ::= Type _id _leftparen Formals _rightparen;
+                    | _void _id _leftparen Formals _rightparen;
+StmtBlock       ::= _leftbracket VariableDecl* Stmt* _rightbracket
+Stmt            ::= _less Expr _greater;
                     | IfStmt
                     | WhileStmt
                     | ForStmt
@@ -67,40 +67,40 @@ Stmt            ::= <Expr> ;
                     | ReturnStmt
                     | PrintStmt
                     | StmtBlock 
-IfStmt          ::= _if (Expr) Stmt <else Stmt>
-WhileStmt       ::= _while (Expr) Stmt
-ForStmt         ::= _for ( <Expr>; Expr; <Expr> ) Stmt
-BreakStmt       ::= _break;
-ReturnStmt      ::= _return <Expr>;
-PrintStmt       ::= _println(Expr+,);
-Expr            ::= Lvalue = Expr
+IfStmt          ::= _if _leftparen Expr _rightparen Stmt _less _else Stmt _greater
+WhileStmt       ::= _while _leftparen Expr _rightparen Stmt
+ForStmt         ::= _for _leftparen _less Expr _greater _semicolon Expr _semicolon _less Expr _greater _rightparen Stmt
+BreakStmt       ::= _break _semicolon
+ReturnStmt      ::= _return _less Expr _greater _semicolon
+PrintStmt       ::= _println _rightparen Expr+ _commma _leftparen_semicolon
+Expr            ::= Lvalue _equal Expr
                     | Constant
                     | Lvalue
                     | Call
-                    | (Expr) 
-                    | Expr + Expr
-                    | Expr – Expr
-                    | Expr * Expr
-                    | Expr / Expr
-                    | Expr % Expr
-                    | -Expr
-                    | Expr < Expr
-                    | Expr <= Expr
-                    | Expr > Expr
-                    | Expr >= Expr
-                    | Expr == Expr
-                    | Expr != Expr
-                    | Expr && Expr
-                    | Expr || Expr
-                    | !Expr readln ()
-                    | new ( _id ) 
-                    | newarray (intconstant, Type)
+                    | _rightparen Expr _leftparen 
+                    | Expr _plus Expr
+                    | Expr _minus Expr
+                    | Expr _multiplication Expr
+                    | Expr _division Expr
+                    | Expr _mod Expr
+                    | _minus Expr
+                    | Expr _less Expr
+                    | Expr _lessequal Expr
+                    | Expr _greater Expr
+                    | Expr _greaterequal Expr
+                    | Expr _equal Expr
+                    | Expr _notequal Expr
+                    | Expr _and Expr
+                    | Expr _or Expr
+                    | _not Expr _readln _leftparen _rightparen
+                    | _new _leftparen _id _rightparen
+                    | newarray _leftparen _intconstant _comma Type _rightparen
 Lvalue          ::= _id
-                    | Lvalue[Expr] 
-                    | Lvalue. _id
-Call            ::= _id ( Actuals) 
-                    | id . id ( Actuals)
-Actuals         ::= Expr+, | e_production
+                    | Lvalue _leftbrace Expr _rightbrace 
+                    | Lvalue _period _id
+Call            ::= _id _leftparen Actuals _rightparen
+                    | -id _period _id _rightparen Actuals _leftparen
+Actuals         ::= Expr+ _comma | e_production
 Constant        ::= intconstant 
                     | doubleconstant 
                     | stringconstant 
