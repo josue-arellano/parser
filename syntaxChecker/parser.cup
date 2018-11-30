@@ -1,0 +1,155 @@
+package syntaxChecker;
+import java_cup.runtime.*;
+
+parser code {:
+    scanner s;
+    Parser(scanner s) { this.s = s; };
+:}
+
+/* Preliminaries to set up and use the scanner.  */
+init with {: s.init();              :};
+scan with {: 
+    Symbol tempSymbol = s.next_token();
+    String symbol = sym.terminalNames[tempSymbol.sym] + " "; 
+    if(!symbol.equals("EOF ")) System.out.print("[shift]\n" + symbol);
+    return tempSymbol;
+:};
+
+/* Terminals (tokens returned by the scanner). */
+terminal            _boolean, _break, _class, _double;
+terminal            _else, _extends, _for, _if;
+terminal            _implements, _int, _interface, _new;
+terminal            _newarray, _null, _println, _readln;
+terminal            _return, _string, _void, _while;
+terminal            _plus, _minus, _multiplication, _division;
+terminal            _mod, _less, _lessequal, _greater;
+terminal            _greaterequal, _equal, _notequal, _and;
+terminal            _or, _not, _assignop, _semicolon;
+terminal            _comma, _period, _leftparen, _rightparen;
+terminal            _leftbracket, _rightbracket, _leftbrace, _rightbrace;
+terminal            _intconstant, _doubleconstant, _stringconstant;
+terminal            _booleanconstant, _id, negation;
+
+/* Non terminals */
+non terminal            Program;
+non terminal            Decl, VariableDecl, FunctionDecl;
+non terminal            ClassDecl, Variable, Type, Formals, Field;
+non terminal            InterfaceDecl, Prototype, StmtBlock, Stmt;
+non terminal            IfStmt, WhileStmt, ForStmt, BreakStmt;
+non terminal            ReturnStmt, PrintStmt, Expr, IDList;
+non terminal            Call, Constant, VarRepeat, Lvalue, Extend;
+non terminal            FieldKleene, ProtoKleene, VarDeclKleene;
+non terminal            StmtKleene, ExprRepeat, DeclRepeat, Implement;
+
+/* Precedences */
+precedence nonassoc     _assignop;
+precedence left         _and, _or;
+precedence left         _equal, _notequal;
+precedence nonassoc     _less, _lessequal, _greater, _greaterequal;
+precedence left         _plus, _minus;
+precedence left         _multiplication, _division, _mod;
+precedence left         _not, negation;
+precedence left         _leftbrace, _period;
+
+/* The grammar */
+Program         ::= DeclRepeat {: System.out.print("[reduce 1] "); :};
+DeclRepeat      ::= Decl {: System.out.print("[reduce 2] "); :}
+                    | Decl DeclRepeat {: System.out.print("[reduce 3] "); :};
+Decl            ::= VariableDecl {: System.out.print("[reduce 4] "); :}
+                    | FunctionDecl {: System.out.print("[reduce 5] "); :}
+                    | ClassDecl {: System.out.print("[reduce 6] "); :}
+                    | InterfaceDecl {: System.out.print("[reduce 7] "); :};
+IDList          ::= _id {: System.out.print("[reduce 8] "); :}
+                    | _id _comma IDList {: System.out.print("[reduce 9] "); :};
+VariableDecl    ::= Variable _semicolon {: System.out.print("[reduce 10] "); :};
+Variable        ::= Type _id {: System.out.print("[reduce 11] "); :};
+Type            ::= _int {: System.out.print("[reduce 12] "); :}
+                    | _double  {: System.out.print("[reduce 13] "); :}
+                    | _boolean {: System.out.print("[reduce 14] "); :}
+                    | _string  {: System.out.print("[reduce 15] "); :}
+                    | Type _leftbrace _rightbrace {: System.out.print("[reduce 16] "); :}
+                    | _id {: System.out.print("[reduce 17] "); :};
+FunctionDecl    ::= Type _id _leftparen Formals _rightparen StmtBlock {: System.out.print("[reduce 18] "); :}
+                    | _void _id _leftparen Formals _rightparen StmtBlock {: System.out.print("[reduce 19] "); :};
+VarRepeat       ::= Variable {: System.out.print("[reduce 20] "); :}
+                    | Variable _comma VarRepeat {: System.out.print("[reduce 21] "); :};
+ClassDecl       ::= _class _id Extend Implement _leftbracket FieldKleene _rightbracket  {: System.out.print("[reduce 22] "); :}
+                    | _class _id Extend Implement _leftbracket _rightbracket {: System.out.println("[reduce 23]"); :};
+Extend          ::= _extends _id  {: System.out.print("[reduce 24] "); :} 
+                    | {: System.out.print("[reduce 25] "); :};
+Implement       ::= _implements IDList {: System.out.print("[reduce 26] "); :}
+                    | {: System.out.print("[reduce 27] "); :};
+FieldKleene     ::= Field {: System.out.print("[reduce 28] "); :}
+                    | Field FieldKleene {: System.out.print("[reduce 29] "); :};
+Field           ::= VariableDecl {: System.out.print("[reduce 30] "); :}
+                    | FunctionDecl {: System.out.print("[reduce 31] "); :};
+InterfaceDecl   ::= _interface _id _leftbracket ProtoKleene _rightbracket {: System.out.print("[reduce 32] "); :};
+ProtoKleene     ::= Prototype ProtoKleene {: System.out.print("[reduce 33] "); :}
+                    | {: System.out.print("[reduce 34] "); :};  
+Prototype       ::= Type _id _leftparen Formals _rightparen _semicolon {: System.out.print("[reduce 35] "); :}
+                    | _void _id _leftparen Formals _rightparen _semicolon {: System.out.print("[reduce 36] "); :};
+Formals         ::= VarRepeat  {: System.out.print("[reduce 37] "); :}
+                    |  {: System.out.print("[reduce 38] "); :};
+StmtBlock       ::= _leftbracket VarDeclKleene StmtKleene _rightbracket {: System.out.print("[reduce 39] "); :}
+                    | _leftbracket StmtKleene _rightbracket {: System.out.print("[reduce 40] "); :};
+VarDeclKleene   ::= VariableDecl VarDeclKleene {: System.out.print("[reduce 41] "); :}
+                    | VariableDecl {: System.out.print("[reduce 42] "); :};
+StmtKleene      ::= Stmt StmtKleene {: System.out.print("[reduce 43] "); :}
+                    | {: System.out.print("[reduce 44] "); :};
+Stmt            ::= Expr _semicolon {: System.out.print("[reduce 45] "); :}
+                    | _semicolon {: System.out.print("[reduce 46] "); :}
+                    | IfStmt {: System.out.print("[reduce 47] "); :}
+                    | WhileStmt {: System.out.print("[reduce 48] "); :}
+                    | ForStmt {: System.out.print("[reduce 49] "); :}
+                    | BreakStmt {: System.out.print("[reduce 50] "); :}
+                    | ReturnStmt {: System.out.print("[reduce 51] "); :}
+                    | PrintStmt {: System.out.print("[reduce 52] "); :}
+                    | StmtBlock {: System.out.print("[reduce 53] "); :};
+IfStmt          ::= _if _leftparen Expr _rightparen Stmt _else Stmt {: System.out.print("[reduce 54] "); :}
+                    | _if _leftparen Expr _rightbrace Stmt {: System.out.print("[reduce 55] "); :};
+WhileStmt       ::= _while _leftparen Expr _rightparen Stmt {: System.out.print("[reduce 56] "); :};
+ForStmt         ::= _for _leftparen _semicolon Expr _semicolon Expr _rightparen Stmt {: System.out.print("[reduce 57] "); :}
+                    | _for _leftparen Expr _semicolon Expr _semicolon  _rightparen Stmt {: System.out.print("[reduce 58] "); :}
+                    | _for _leftparen _semicolon Expr _semicolon _rightparen Stmt {: System.out.print("[reduce 59] "); :}
+                    | _for _leftparen Expr _semicolon Expr _semicolon Expr _rightparen Stmt {: System.out.print("[reduce 60] "); :};
+BreakStmt       ::= _break _semicolon  {: System.out.print("[reduce 61] "); :};
+ReturnStmt      ::= _return Expr _semicolon {: System.out.print("[reduce 62] "); :}
+                    | _return _semicolon {: System.out.print("[reduce 63] "); :};
+PrintStmt       ::= _println _leftparen ExprRepeat _rightparen _semicolon {: System.out.print("[reduce 64] "); :};
+Expr            ::= Lvalue _assignop Expr {: System.out.print("[reduce 65] "); :}
+                    | Lvalue {: System.out.print("[reduce 66] "); :}
+                    | Call {: System.out.print("[reduce 67] "); :}
+                    | _leftparen Expr _rightparen  {: System.out.print("[reduce 68] "); :}
+                    | Expr _plus Expr {: System.out.print("[reduce 69] "); :}
+                    | Expr _minus Expr {: System.out.print("[reduce 70] "); :}
+                    | Expr _multiplication Expr {: System.out.print("[reduce 71] "); :}
+                    | Expr _division Expr {: System.out.print("[reduce 72] "); :}
+                    | Expr _mod Expr {: System.out.print("[reduce 73] "); :}
+                    | _minus Expr {: System.out.print("[reduce 74] "); :} %prec negation
+                    | Expr _less Expr {: System.out.print("[reduce 75] "); :}
+                    | Expr _lessequal Expr {: System.out.print("[reduce 76] "); :}
+                    | Expr _greater Expr {: System.out.print("[reduce 77] "); :}
+                    | Expr _greaterequal Expr {: System.out.print("[reduce 78] "); :}
+                    | Expr _equal Expr {: System.out.print("[reduce 79] "); :}
+                    | Expr _notequal Expr {: System.out.print("[reduce 80] "); :}
+                    | Expr _and Expr {: System.out.print("[reduce 81] "); :}
+                    | Expr _or Expr {: System.out.print("[reduce 82] "); :}
+                    | _not Expr  {: System.out.print("[reduce 83] "); :}
+                    | _readln _leftparen _rightparen {: System.out.print("[reduce 84] "); :}
+                    | _new _leftparen _id _rightparen {: System.out.print("[reduce 85] "); :}
+                    | _newarray _leftparen _intconstant _comma Type _rightparen {: System.out.print("[reduce 86] "); :}
+                    | Constant {: System.out.print("[reduce 87] "); :};
+Lvalue          ::= _id {: System.out.print("[reduce 88] "); :}
+                    | Lvalue _leftbrace Expr _rightbrace {: System.out.print("[reduce 89] "); :}
+                    | Lvalue _period _id {: System.out.print("[reduce 90] "); :};
+Call            ::= _id _leftparen ExprRepeat _rightparen {: System.out.print("[reduce 91] "); :}
+                    | _id _leftparen _rightparen {: System.out.print("[reduce 92] "); :}
+                    | _id _period _id _leftparen ExprRepeat _rightparen {: System.out.print("[reduce 93] "); :}
+                    | _id _period _id _leftparen _rightparen {: System.out.print("[reduce 94] "); :};
+ExprRepeat      ::= Expr _comma ExprRepeat {: System.out.print("[reduce 95] "); :}
+                    | Expr {: System.out.print("[reduce 96] "); :};
+Constant        ::= _intconstant  {: System.out.print("[reduce 97] "); :}
+                    | _doubleconstant {: System.out.print("[reduce 98] "); :}
+                    | _stringconstant {: System.out.print("[reduce 99] "); :}
+                    | _booleanconstant {: System.out.print("[reduce 100] "); :}
+                    | _null {: System.out.print("[reduce 101] "); :};

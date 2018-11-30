@@ -1,0 +1,5 @@
+cd syntaxChecker/
+java -jar /usr/local/src/java-cup-11b.jar -interface -parser Parser -expect 2 parser.cup
+cd ..
+javac -cp /usr/local/src/java-cup-11b-runtime.jar:. syntaxChecker/*.java
+
