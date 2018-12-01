@@ -40,6 +40,8 @@ non terminal            ReturnStmt, PrintStmt, Expr, IDList;
 non terminal            Call, Constant, VarRepeat, Lvalue, Extend;
 non terminal            FieldKleene, ProtoKleene, VarDeclKleene;
 non terminal            StmtKleene, ExprRepeat, DeclRepeat, Implement;
+non terminal            LvalBrace, IdBrace, TypeBrace, BuiltInTypes;
+non terminal            BraceRepeat;
 
 /* Precedences */
 precedence nonassoc     _assignop;
@@ -63,11 +65,14 @@ IDList          ::= _id {: System.out.print("[reduce 8] "); :}
                     | _id _comma IDList {: System.out.print("[reduce 9] "); :};
 VariableDecl    ::= Variable _semicolon {: System.out.print("[reduce 10] "); :};
 Variable        ::= Type _id {: System.out.print("[reduce 11] "); :};
-Type            ::= _int {: System.out.print("[reduce 12] "); :}
+BuiltInTypes    ::= _int {: System.out.print("[reduce 12] "); :}
                     | _double  {: System.out.print("[reduce 13] "); :}
                     | _boolean {: System.out.print("[reduce 14] "); :}
-                    | _string  {: System.out.print("[reduce 15] "); :}
-                    | Type _leftbrace _rightbrace {: System.out.print("[reduce 16] "); :}
+                    | _string  {: System.out.print("[reduce 15] "); :};
+/*                   | Type _leftbrace _rightbrace {: System.out.print("[reduce 16] "); :}
+ */
+ Type           ::= BuiltInTypes
+                    | TypeBrace
                     | _id {: System.out.print("[reduce 17] "); :};
 FunctionDecl    ::= Type _id _leftparen Formals _rightparen StmtBlock {: System.out.print("[reduce 18] "); :}
                     | _void _id _leftparen Formals _rightparen StmtBlock {: System.out.print("[reduce 19] "); :};
@@ -140,8 +145,9 @@ Expr            ::= Lvalue _assignop Expr {: System.out.print("[reduce 65] "); :
                     | _newarray _leftparen _intconstant _comma Type _rightparen {: System.out.print("[reduce 86] "); :}
                     | Constant {: System.out.print("[reduce 87] "); :};
 Lvalue          ::= _id {: System.out.print("[reduce 88] "); :}
-                    | Lvalue _leftbrace Expr _rightbrace {: System.out.print("[reduce 89] "); :}
-                    | Lvalue _period _id {: System.out.print("[reduce 90] "); :};
+/*                    | Lvalue _leftbrace Expr _rightbrace {: System.out.print("[reduce 89] "); :}
+*/                    | Lvalue _period _id {: System.out.print("[reduce 90] "); :}
+                    | LvalBrace;
 Call            ::= _id _leftparen ExprRepeat _rightparen {: System.out.print("[reduce 91] "); :}
                     | _id _leftparen _rightparen {: System.out.print("[reduce 92] "); :}
                     | _id _period _id _leftparen ExprRepeat _rightparen {: System.out.print("[reduce 93] "); :}
@@ -153,3 +159,11 @@ Constant        ::= _intconstant  {: System.out.print("[reduce 97] "); :}
                     | _stringconstant {: System.out.print("[reduce 99] "); :}
                     | _booleanconstant {: System.out.print("[reduce 100] "); :}
                     | _null {: System.out.print("[reduce 101] "); :};
+IdBrace         ::= _id _leftbrace;
+TypeBrace       ::= IdBrace _rightbrace BraceRepeat
+                    | BuiltInTypes _leftbrace _rightbrace BraceRepeat;
+BraceRepeat     ::= _leftbrace _rightbrace BraceRepeat
+                    | ;
+LvalBrace       ::= LvalBrace Expr _rightbrace
+                    | IdBrace Expr _rightbrace
+                    | Lvalue _leftbrace Expr _rightbrace;
